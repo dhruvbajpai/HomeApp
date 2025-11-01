@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodGuesser - Guess the Country!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .dish-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dish-name {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .dish-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .ingredients {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .ingredients-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .ingredients-list {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            padding: 20px;
+            font-size: 1.1em;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .option-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .option-btn.correct {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .option-btn.incorrect {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .result-message {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result-message.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+            display: block;
+        }
+
+        .result-message.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+            display: block;
+        }
+
+        .next-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            display: none;
+        }
+
+        .next-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .error {
+            padding: 20px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .game-card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .score-board {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-card">
+            <h1>🍽️ FoodGuesser</h1>
+            <p class="subtitle">Can you guess which country this dish is from?</p>
+
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">Correct</div>
+                    <div class="score-value" id="correct-score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Wrong</div>
+                    <div class="score-value" id="wrong-score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Total</div>
+                    <div class="score-value" id="total-score">0</div>
+                </div>
+            </div>
+
+            <div id="game-content">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDish = null;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let totalCount = 0;
+
+        // Load a new question
+        async function loadQuestion() {
+            try {
+                const response = await fetch('/api/foodguesser/question');
+                if (!response.ok) throw new Error('Failed to load question');
+
+                currentDish = await response.json();
+                displayQuestion();
+            } catch (error) {
+                document.getElementById('game-content').innerHTML = `
+                    <div class="error">
+                        Error loading question. Please make sure the server is running.
+                        <br><br>Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Display the question
+        function displayQuestion() {
+            const content = document.getElementById('game-content');
+            content.innerHTML = `
+                <img src="${currentDish.imageUrl}" alt="${currentDish.name}" class="dish-image" onerror="this.src='https://via.placeholder.com/800x400?text=Food+Image'">
+
+                <div class="dish-name">${currentDish.name}</div>
+
+                <div class="dish-description">${currentDish.description}</div>
+
+                <div class="ingredients">
+                    <div class="ingredients-title">Ingredients:</div>
+                    <div class="ingredients-list">${currentDish.ingredients.join(', ')}</div>
+                </div>
+
+                <div class="result-message" id="result-message"></div>
+
+                <div class="options-grid" id="options-grid">
+                    ${currentDish.options.map(option => `
+                        <button class="option-btn" onclick="submitGuess('${option}')">${option}</button>
+                    `).join('')}
+                </div>
+
+                <button class="next-btn" id="next-btn" onclick="loadQuestion()">Next Dish →</button>
+            `;
+        }
+
+        // Submit a guess
+        async function submitGuess(country) {
+            // Disable all buttons
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            try {
+                const response = await fetch(`/api/foodguesser/guess?dishId=${currentDish.id}&country=${encodeURIComponent(country)}`);
+                if (!response.ok) throw new Error('Failed to submit guess');
+
+                const result = await response.json();
+                displayResult(result, country);
+            } catch (error) {
+                alert('Error submitting guess: ' + error.message);
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        // Display the result
+        function displayResult(result, guessedCountry) {
+            const resultMessage = document.getElementById('result-message');
+            const buttons = document.querySelectorAll('.option-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            // Update score
+            if (result.correct) {
+                correctCount++;
+                resultMessage.className = 'result-message correct';
+                resultMessage.textContent = '✓ ' + result.message;
+            } else {
+                wrongCount++;
+                resultMessage.className = 'result-message incorrect';
+                resultMessage.textContent = '✗ ' + result.message;
+            }
+
+            totalCount++;
+            updateScoreboard();
+
+            // Highlight correct and incorrect answers
+            buttons.forEach(btn => {
+                if (btn.textContent === result.correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === guessedCountry && !result.correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Show next button
+            nextBtn.style.display = 'inline-block';
+        }
+
+        // Update scoreboard
+        function updateScoreboard() {
+            document.getElementById('correct-score').textContent = correctCount;
+            document.getElementById('wrong-score').textContent = wrongCount;
+            document.getElementById('total-score').textContent = totalCount;
+        }
+
+        // Initialize the game
+        loadQuestion();
+    </script>
+</body>
+</html>
